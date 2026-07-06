@@ -1,1 +1,6 @@
-
+rule Local_Lab_Malware_Test {
+    strings:
+        $magic_string = "HELLOWORLD_MALWARE_TEST"
+    condition:
+        $magic_string
+}
