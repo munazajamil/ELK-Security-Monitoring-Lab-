@@ -30,35 +30,6 @@ This project demonstrates the deployment of an ELK Stack security monitoring env
 
 (Add your architecture image here.)
 
-## Screenshots
-
-### ELK Stack Running
-
-![ELK](screenshots/01-ELK-Running.png)
-
-### Fleet Server
-
-![Fleet](screenshots/02-Fleet-Server.png)
-
-### Linux Elastic Agent
-
-![Linux](screenshots/03-Linux-Agent.png)
-
-### Windows Defender Logs
-
-![Defender](screenshots/05-Windows-Defender.png)
-
-### Sysmon Events
-
-![Sysmon](screenshots/06-Sysmon.png)
-
-### Custom YARA Rule
-
-![YARA Rule](screenshots/07-YARA-Rule.png)
-
-### YARA Detection Output
-
-![YARA Output](screenshots/08-YARA-Output.png)
 
 ## Skills Demonstrated
 
@@ -77,3 +48,69 @@ This project demonstrates the deployment of an ELK Stack security monitoring env
 - Create Kibana Detection Rules for YARA matches
 - Automate YARA scanning
 - Build custom dashboards for YARA detections
+
+Setup walkthrough
+
+1. Deploy the ELK stack
+
+powershellcd "C:\Users\ELK-Lab"
+docker compose up -d
+docker compose ps
+
+Confirms elasticsearch and kibana, both Up.
+
+2. Configure Fleet Server
+
+
+Kibana → Fleet → Agents → Add Fleet Server
+Followed the guided setup, generated the Fleet Server policy and enrollment token
+
+
+3. Enroll the Linux (Kali) agent
+
+
+Ran the generated elastic-agent install command with the Fleet Server URL + enrollment token
+Agent shows up in Fleet → Agents as kali, status Healthy
+
+
+4. Verify data in Kibana
+
+
+Discover → logs-* and Discover → metrics-* both show live documents from the
+Fleet Server and Linux agent, timestamps updating in real time
+
+
+5. Sysmon on Windows
+
+
+Installed Sysmon with a baseline config
+Confirmed Process Create (Event ID 1) events logging under
+Applications and Services Logs → Microsoft → Windows → Sysmon → Operational
+
+
+6. Custom YARA rule
+
+
+Wrote Local_Lab_Malware_Test rule targeting a known string
+Also tested a rule detecting EICAR test files across a sample directory
+Ran via PowerShell, logged detections to yara.log
+
+
+
+Troubleshooting notes
+
+
+Had an orphaned elk-lab-fleet-server-1 container appear after a docker compose down -v /
+up -d cycle — Compose flagged it but didn't block startup; cleaned up manually.
+docker-compose.yml throws a warning that the top-level version key is obsolete in
+Compose v2 — cosmetic, doesn't block deployment, but worth stripping out for a clean repo.
+
+
+Why this project
+
+Built to get hands-on with the exact stack SOC teams use day to day agent-based log
+collection, host telemetry via Sysmon, and rule-based detection via YARA rather than just
+reading about them. Next iteration closes the loop: raw detections → SIEM-visible alerts.
+
+
+Author: Munnaza Jamil — SOC Analyst Intern | GitHub | LinkedIn
